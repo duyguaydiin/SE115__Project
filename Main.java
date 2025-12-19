@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.util.*;
 public class Main{
@@ -18,12 +17,42 @@ public class Main{
         }
         return -1;
     }
-
-
-
     public static void loadData() {
+        for (int i = 0; i < MONTHS; i++) {
+            Scanner reader = null;
 
+            try {
+                File file = new File("Data_Files/" + months[i] + ".txt");   //dosyalar okunmaya basladı
+                reader = new Scanner(file);
+                while (reader.hasNextLine()) {
+                    String line = reader.nextLine();
+                    String[] parts = line.split(","); //satırları 3 parçaya ayırdı
+                    if (parts.length != 3) {
+                        continue;  //sorun çıkmaması için satır uzunluğu 3 olmayanların atlanması için yazdım güvenlik kontrolü sağladı
+                    }
+                    String dayStr = parts[0].trim();
+                    String commodityStr = parts[1].trim();
+                    String profitStr = parts[2].trim(); //boşluklar temizlendi
+
+                    if (dayStr.equals("Day")) continue;
+                    int dayIndex = Integer.parseInt(dayStr) - 1; //günü integere çevirdi
+                    int profitValue = Integer.parseInt(profitStr); //karı double veri tipine çevirdi
+                    if (dayIndex < 0 || dayIndex >= DAYS) continue;
+                    int commodityIndex = commodityIndexOf(commodityStr);
+                    if (commodityIndex == -1) continue;
+                    profit[i][dayIndex][commodityIndex] = profitValue; //dosyada olan karı en başta oluşturduğumuz 3 boyutlu arrayin içine yerleştirdi
+                }
+            } catch (Exception ex) {
+            } finally {
+                if (reader != null) {
+                    reader.close();//sistem çökmesin diye scanner olan readerı kapattım 
+                }
+            }
+        }
     }
+
+
+}
 
     public static String mostProfitableCommodityInMonth(int month) {
         return "DUMMY";
