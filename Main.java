@@ -19,23 +19,22 @@ public class Main {
         }
         return -1;
     }
-
     public static void loadData() {
         for (int i = 0; i < MONTHS; i++) {
-            Scanner reader = null;
+            Scanner sc = null;
 
             try {
                 File file = new File("Data_Files/" + months[i] + ".txt");   //dosyalar okunmaya basladı
-                reader = new Scanner(file);
-                while (reader.hasNextLine()) {
-                    String line = reader.nextLine();
+                sc = new Scanner(file);// fileları oku
+                while (sc.hasNextLine()) {
+                    String line = sc.nextLine();
                     String[] parts = line.split(","); //satırları 3 parçaya ayırdı
                     if (parts.length != 3) {
                         continue;  //sorun çıkmaması için satır uzunluğu 3 olmayanların atlanması için yazdım güvenlik kontrolü sağladı
                     }
                     String dayStr = parts[0].trim();
                     String commodityStr = parts[1].trim();
-                    String profitStr = parts[2].trim(); //boşluklar temizlendi
+                    String profitStr = parts[2].trim(); //sayının baş ve sonundaki gereksiz boşluklar temizlendi
 
                     if (dayStr.equals("Day")) continue;
                     int dayIndex = Integer.parseInt(dayStr) - 1; //günü integere çevirdi
@@ -47,11 +46,12 @@ public class Main {
                 }
             } catch (Exception ex) {
             } finally {
-                if (reader != null) {
-                    reader.close();//sistem çökmesin diye scanner olan readerı kapattım
+                if (sc != null) {
+                    sc.close();//sistem çökmesin diye scanner olan readerı kapattım
                 }
             }
         }
+    }
         public static String mostProfitableCommodityInMonth ( int month){
             if (month < 0 || month > 11) return "INVALID_MONTH"; //month icin geçerli olmayan değerler
             int bestTotal = 0;
@@ -70,6 +70,7 @@ public class Main {
                 }
             }
             return commodities[bestIndex] + " " +bestTotal;
+            return commodities[bestIndex] + " " + bestTotal;
 
         }
 
@@ -80,40 +81,89 @@ public class Main {
         if (month < 0 || month > 11) return -99999;
         for (int i = 0; i < COMMS; i++) { //her comms için aylık kar hesapladı
             totalProfit += profit[month][dayIndex][i];
+        public static int totalProfitOnDay ( int month, int day){
+            int totalProfitof = 0;
+            int dayIndex = day - 1;
+            if (day < 1 || day > 28) return -99999; //invalid month ve day için
+            if (month < 0 || month > 11) return -99999;
+            for (int i = 0; i < COMMS; i++) { //her comms için aylık kar hesapladı
+                totalProfitof += profit[month][dayIndex][i];
+            }
+            return totalProfitof;
         }
         return totalProfit;
-    }
-        public static int commodityProfitInRange(String commodity, int fromDay, int toDay) {
-        int commodityIndex = commodityIndexOf(commodity);
-        if (commodityIndex == -1) return -99999;
-        if (fromDay > toDay || fromDay < 1 || fromDay > 28 || toDay < 1 || toDay > 28) return -99999;
-        int fromDayIndex = fromDay - 1;
-        int toDayIndex = toDay - 1;
-        int totalRange = 0;
-        for (int i = 0; i < MONTHS; i++) {     //tüm aylar  boyunca,belirtilen gün aralığında(toDay-fromDay) istenilen commoditynin karını topladı
-            for (int j = fromDayIndex; j <= toDayIndex; j++) {
-                totalRange += profit[i][j][commodityIndex];//
+        public static int commodityProfitInRange (String commodity,int fromDay, int toDay){
+            int commodityIndex = commodityIndexOf(commodity);
+            if (commodityIndex == -1) return -99999;
+            if (fromDay > toDay || fromDay < 1 || fromDay > 28 || toDay < 1 || toDay > 28) return -99999;
+            int fromDayIndex = fromDay - 1;
+            int toDayIndex = toDay - 1;
+            int totalRange = 0;
+            for (int i = 0; i < MONTHS; i++) {     //tüm aylar  boyunca,toDay-fromDay arasındaki commoditylerin kar toplamı
+                for (int j = fromDayIndex; j <= toDayIndex; j++) {
+                    totalRange += profit[i][j][commodityIndex];//
+                }
             }
+            return totalRange;
         }
         return totalRange;
-    }
 
-    public static int bestDayOfMonth(int month) {
-        if (month < 0 || month > 11) return -1;
-        int bestTotal = 0;
-        int bestDayIndex = 0;
-        for (int i = 0; i < COMMS; i++) { //1.gün toplamı
-            bestTotal += profit[month][0][i];
-        }
-        for (int j = 1; j < DAYS; j++) { //kalan günlerde commoditylerden yapılan karları hesapladım.
-            int dayTotal = 0;
+        public static int bestDayOfMonth ( int month){
+            if (month < 0 || month > 11) return -1; // invalid değer değilse
+            int bestTotal = 0;
+            int bestDayIndex = 0;
             for (int i = 0; i < COMMS; i++) {
-                dayTotal += profit[month][j][i];
+                bestTotal += profit[month][0][i];
             }
-            if (dayTotal > bestTotal) { // o gün yapılan kar o güne kadar yapılan karlardan fazlaysa bestTotal o olur
-                bestTotal = dayTotal;
-                bestDayIndex = j;
+            for (int j = 1; j < DAYS; j++) { //kalan günlerde commoditylerde yapılan karlar hesaplandı
+                int dayTotal = 0;
+                for (int i = 0; i < COMMS; i++) {
+                    dayTotal += profit[month][j][i];
+                }
+                if (dayTotal > bestTotal) { // o gün yapılan kar o güne kadar yapılan karlardan fazlaysa bestTotal o olur
+                    bestTotal = dayTotal;
+                    bestDayIndex = j;
+                }
             }
+
+            return bestDayIndex + 1; //days array indexi 0'Dan basladıgı icin 1den başlatmak için 1 eklendi
+        }
+        public static String bestMonthForCommodity (String commodity){
+            int commodityIndex = commodityIndexOf(commodity);
+            if (commodityIndex == -1) return "INVALID_COMMODITY";
+            int bestTotal = 0;
+            int bestMonthIndex = 0;
+                bestTotal += profit[0][j][commodityIndex]; //ocak toplamı
+            }
+            for (int i = 1; i < MONTHS; i++) { // diğer aylardaki tüm günlerdeki karları hesapladım
+                int monthTotal = 0;
+                for (int j = 0; j < DAYS; j++) {
+                    monthTotal += profit[i][j][commodityIndex];
+                }
+                if (monthTotal > bestTotal) { //o ay içerisindeki karı önceki aylardaki karlardan fazla olanı bestTotal olarak isimlendirdim
+                    bestTotal = monthTotal;
+                    bestMonthIndex = i;
+                }
+            }
+            return months[bestMonthIndex]; // month dizisindeki elemanlar arasından seçilen bestMonthu döndürdü
+        }
+        public static int consecutiveLossDays (String commodity){
+            int commodityIndex = commodityIndexOf(commodity);
+            if (commodityIndex == -1) return -1;
+            int currentStreak = 0;
+            int maxStreak = 0;
+            for (int i = 0; i < MONTHS; i++) { //önce 1. forla bütün ayları gezdi en başta tanımlanan ay sayısı kadar
+                for (int j = 0; j < DAYS; j++) { // buradaki forla da gezdiği aylar içindeki günlere sıra sıra baktı en başta verilen gün sayısına kadar
+                    if (profit[i][j][commodityIndex] < 0) { //eğer bu kar değeri negatifse mevcut Streak arttı
+                        currentStreak++;
+                        if (currentStreak > maxStreak)
+                            maxStreak = currentStreak;//mevcut streak hesaplanandan büyükse o zaman mevcutu hesaplanan olarak eşleştirdi
+                    } else {  //negatif değer yoksa sıfırda kalması için
+                        currentStreak = 0;
+                    }
+                }
+            }
+            return maxStreak;
         }
 
         return bestDayIndex + 1; //days array indexi 0'Dan basladıgı icin 1den başlatmak için 1 eklendi
