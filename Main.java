@@ -165,9 +165,43 @@ public class Main {
             }
             return maxStreak;
         }
+        public static int daysAboveThreshold (String commodity,int threshold){
+            int commodityyIndex = commodityIndexOf(commodity);
+            if (commodityyIndex == -1) return -1;
+            int countof = 0;
+            for (int i = 0; i < MONTHS; i++) { //tüm aylardaki ,tüm günlerdeki seçilen commodity icin kar miktarı thresolddan fazla mı baktı
+                for (int j = 0; j < DAYS; j++) {
+                    if (profit[i][j][commodityyIndex] > threshold) {
+                        countof++; // eğer thresholddan büyükse 1 artırdı
+                    }
+                }
+            }
+            return countof;// bulunan count değerini döndürdü
+        }
+        public static int biggestDailySwing ( int month){
+            if (month < 0 || month > 11) return -99999;
+            int maxdiff = 0;
+            int diff = 0;
+            for (int i = 0; i < DAYS - 1; i++) {
+                int totalProfitdayone = 0;
+                int totalProfitdaytwo = 0;
+                for (int j = 0; j < COMMS; j++) {
+                    totalProfitdayone += profit[month][i][j];//i ve j değerine göre kar buldu
+                    totalProfitdaytwo += profit[month][i + 1][j];// bir sonraki günün karını buldu
+                }
+                diff = totalProfitdaytwo - totalProfitdayone; //2 günün farkını buldu
+                if (diff < 0) { //fark negatifse (-1) ile çarptı negatif cevap alınmamalı
+                    diff = diff * (-1);
+                }
+                if (diff > maxdiff) { //fark o güne kadar elde edilen maksimum farktan büyükse max o olur
+                    maxdiff = diff;
+
+                }
+            }
+            return maxdiff;
+        }
 
         return bestDayIndex + 1; //days array indexi 0'Dan basladıgı icin 1den başlatmak için 1 eklendi
     }
-}
 
 
