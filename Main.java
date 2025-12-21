@@ -200,8 +200,62 @@ public class Main {
             }
             return maxdiff;
         }
+        public static String compareTwoCommodities (String c1, String c2){
+            int index1 = commodityIndexOf(c1);
+            int index2 = commodityIndexOf(c2);
+            if (index1 == -1 || index2 == -1) return "INVALID_COMMODITY";
+            int profit1 = 0;
+            int profit2 = 0;
 
-        return bestDayIndex + 1; //days array indexi 0'Dan basladıgı icin 1den başlatmak için 1 eklendi
+            for (int i = 0; i < MONTHS; i++) {  //tüm aylardaki ve günlerdeki iki boyutlu commodityler hesaplandı
+                for (int j = 0; j < DAYS; j++) {
+                    profit1 += profit[i][j][index1];
+                    profit2 += profit[i][j][index2];
+
+                }
+            }
+
+            if (profit1 == profit2) return "Equal"; //karın eşit olması durumu
+            if (profit1 > profit2) {
+                return c1 + " is better by " + (profit1 - profit2);//kar eşit değilse farkı yazdırdı
+            } else {
+                return c2 + " is better by " + (profit2 - profit1); //X her zaman pozitif olmalı
+            }
+        }
+        public static String bestWeekOfMonth ( int month){
+            if (month < 0 || month > 11) return "INVALID_MONTH";
+            int maxWeek = 1;
+
+
+            int maxWeekProfit = 0;
+            for (int day = 0; day < 7; day++) { //1.haftanın commodityleri için toplam
+                for (int i = 0; i < COMMS; i++) {
+                    maxWeekProfit += profit[month][day][i];
+                }
+            }
+
+            for (int start = 7; start < DAYS; start += 7) { //2-4. haftaların commodityler icin kar toplamı
+                int weekProfit = 0;
+                for (int day = start; day < start + 7 && day < DAYS; day++) { //haftalık kar hesaplama
+                    for (int i = 0; i < COMMS; i++) {
+                        weekProfit += profit[month][day][i];
+                    }
+                }
+                int weekNo = (start / 7) + 1; //hafta numarasını buldu
+                if (weekProfit > maxWeekProfit) { //o zamana kadar elde edilen karlara bakılır eğer o haftaki daha büyükse en iyi kar o olur
+                    maxWeekProfit = weekProfit;
+                    maxWeek = weekNo; //en iyi olan hafta güncellendi
+                }
+            }
+
+            return "Week " + maxWeek;
+        }
+        public static void main (String[]args){
+            loadData();
+            System.out.println("Data loaded – ready for queries");
+
+
+        }
     }
 
 
